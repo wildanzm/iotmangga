@@ -1,141 +1,249 @@
-# IoT Mangga — Sistem Monitoring & Etalase Mangga
+<div align="center">
 
-Aplikasi web berbasis **SvelteKit + Bun + Prisma + Supabase** untuk monitoring sensor IoT pohon mangga (kelembapan tanah, pH, dan TDS) via ESP32/ESP8266, lengkap dengan etalase publik hasil panen.
+<h1>IoT Mangga</h1>
 
----
+<h3>Mango orchard monitoring and public storefront</h3>
 
-## Fitur Utama
+<p>
+  IoT Mangga is a web application that collects soil moisture, pH, and TDS readings
+  from ESP32 and ESP8266 sensors installed in mango orchards. Orchard owners follow the readings
+  on a live dashboard, and visitors browse a public storefront of harvested mangoes
+  with soil quality indicators for each orchard.
+</p>
 
-### 🌿 Monitoring IoT Realtime
-- Dashboard sensor realtime via Supabase WebSocket (tanpa polling)
-- Grafik historis kelembapan, pH, dan TDS per perangkat
-- Manajemen perangkat IoT dengan API Key one-time-view
-- OTA (Over-The-Air) firmware update untuk ESP32/ESP8266
+<p>
+  <img src="https://img.shields.io/badge/SvelteKit-FF3E00?style=for-the-badge&logo=svelte&logoColor=white" alt="SvelteKit" />
+  <img src="https://img.shields.io/badge/Bun-000000?style=for-the-badge&logo=bun&logoColor=white" alt="Bun" />
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS_v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS" />
+  <br />
+  <img src="https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white" alt="Prisma" />
+  <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase" />
+  <img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL" />
+  <img src="https://img.shields.io/badge/ESP32-E7352C?style=for-the-badge&logo=espressif&logoColor=white" alt="ESP32" />
+  <img src="https://img.shields.io/badge/C++-00599C?style=for-the-badge&logo=cplusplus&logoColor=white" alt="C++" />
+</p>
 
-### 🏡 Manajemen Kebun
-- Buat dan kelola Kebun (lokasi) di `/dashboard/kebun`
-- Hubungkan perangkat IoT ke kebun masing-masing
-- Tampilan agregasi produk per kebun
+</div>
 
-### 🥭 Etalase Publik (Root `/`)
-- Halaman publik tanpa login yang menampilkan produk mangga per kebun
-- Rata-rata sensor (kelembapan, pH, TDS) diperbarui **realtime** via Supabase Realtime
-- Indikator kualitas tanah berwarna hijau/kuning/merah
-- Empty state jika belum ada produk terpublish
+## Table of contents
 
-### 📦 Manajemen Produk
-- Tambah/edit/hapus produk per perangkat di `/dashboard/devices/[id]`
-- Field: nama, deskripsi, harga, stok, satuan, tanggal panen, foto (URL), toggle publish
-- Validasi: harga & stok >= 0, URL foto harus valid, nama max 200 karakter
+- [Features](#features)
+- [Tech stack](#tech-stack)
+- [How it works](#how-it-works)
+- [Getting started](#getting-started)
+- [Supabase Realtime setup](#supabase-realtime-setup)
+- [API reference](#api-reference)
+- [Production build](#production-build)
+- [Project structure](#project-structure)
+- [Scaffolding command](#scaffolding-command)
 
----
+## Features
 
-## Stack Teknologi
+### Realtime monitoring
 
-| Layer | Teknologi |
-|-------|-----------|
-| Framework | SvelteKit (App Router) |
-| Runtime | Bun |
-| Database | Supabase PostgreSQL |
-| ORM | Prisma (with `@prisma/adapter-pg`) |
-| Realtime | Supabase Realtime (WebSocket) |
-| Styling | TailwindCSS v4 |
-| Hardware | ESP32/ESP8266 (C++ Firmware) |
+- Live sensor dashboard powered by Supabase Realtime over WebSocket, with no polling.
+- Historical charts for moisture, pH, and TDS per device.
+- IoT device management with API keys that are shown once, at creation.
+- Over-the-air (OTA) firmware updates for ESP32 and ESP8266.
 
----
+### Orchard management
 
-## Setup & Pengembangan
+- Create and manage orchards (locations) at `/dashboard/kebun`.
+- Assign IoT devices to orchards.
+- View aggregated products for each orchard.
 
-### 1. Prasyarat
-```sh
-# Install dependencies
+### Public storefront
+
+The root route `/` is public and requires no login.
+
+- Lists mango products grouped by orchard.
+- Shows average moisture, pH, and TDS per orchard, updated live through Supabase Realtime.
+- Marks soil quality with a green, yellow, or red indicator.
+- Shows an empty state when no products are published.
+
+### Product management
+
+Manage products for each device at `/dashboard/devices/[id]`: add, edit, and delete.
+
+| Field        | Notes                                |
+| ------------ | ------------------------------------ |
+| Name         | Required, maximum 200 characters     |
+| Description  | Free text                            |
+| Price        | Greater than or equal to 0           |
+| Stock        | Greater than or equal to 0           |
+| Unit         | Unit of sale                         |
+| Harvest date | Date of harvest                      |
+| Photo        | Image URL, must be a valid URL       |
+| Published    | Toggle that controls public listing  |
+
+## Tech stack
+
+| Layer     | Technology                                                  |
+| --------- | ----------------------------------------------------------- |
+| Framework | [SvelteKit](https://svelte.dev/docs/kit)                    |
+| Runtime   | [Bun](https://bun.sh)                                       |
+| Database  | [Supabase](https://supabase.com) PostgreSQL                 |
+| ORM       | [Prisma](https://www.prisma.io) with `@prisma/adapter-pg`   |
+| Realtime  | Supabase Realtime (WebSocket)                               |
+| Styling   | [Tailwind CSS](https://tailwindcss.com) v4                  |
+| Hardware  | ESP32 and ESP8266 running C++ firmware                      |
+
+## How it works
+
+```mermaid
+flowchart LR
+    A[ESP32 / ESP8266] -->|POST /api/sensor-data| B[SvelteKit API]
+    B --> C[(Supabase PostgreSQL)]
+    C -->|Realtime INSERT events| D[Dashboard]
+    C -->|Realtime INSERT events| E[Public storefront]
+    A -->|GET /api/ota| B
+```
+
+Devices send readings to the API with their API key. The API stores each reading in the `SensorData` table, and Supabase Realtime pushes new rows to the dashboard and the storefront.
+
+## Getting started
+
+### Prerequisites
+
+- [Bun](https://bun.sh)
+- A [Supabase](https://supabase.com) project
+
+### Installation
+
+```bash
+git clone https://github.com/wildanzm/iotmangga.git
+cd iotmangga
 bun install
 ```
 
-### 2. Konfigurasi Environment
-Salin `.env.example` ke `.env` dan isi variabel berikut:
-```env
-PUBLIC_SUPABASE_URL=https://xxx.supabase.co
-PUBLIC_SUPABASE_ANON_KEY=sb_publishable_...
-DATABASE_URL=postgresql://...?pgbouncer=true
-DIRECT_URL=postgresql://...   # Untuk migrasi Prisma
-CRON_SECRET=your_secret_here
+### Environment variables
+
+Copy `.env.example` to `.env` and fill in the values:
+
+```bash
+cp .env.example .env
 ```
 
-### 3. Migrasi Database
+| Variable                   | Description                                              |
+| -------------------------- | -------------------------------------------------------- |
+| `PUBLIC_SUPABASE_URL`      | Supabase project URL, for example `https://xxx.supabase.co` |
+| `PUBLIC_SUPABASE_ANON_KEY` | Supabase publishable (anon) key                          |
+| `DATABASE_URL`             | Pooled PostgreSQL connection string (`?pgbouncer=true`)  |
+| `DIRECT_URL`               | Direct PostgreSQL connection string, used by Prisma migrations |
+| `CRON_SECRET`              | Secret used by scheduled (cron) tasks                    |
 
-#### Inisialisasi pertama kali:
-```sh
+### Database setup
+
+Create the initial migration and generate the Prisma client:
+
+```bash
 bunx prisma migrate dev --name init
 bunx prisma generate
 ```
 
-#### Migrasi Kebun & Produk (fitur etalase):
-Jika schema tidak sinkron dengan migration history (drift), gunakan:
-```sh
-# Lihat SQL yang perlu dijalankan:
+If the schema drifts from the migration history (for example after adding the orchard and product tables), choose one of these fixes.
+
+Create a manual migration and mark it as applied:
+
+```bash
+# Print the SQL needed to match the schema
 bunx prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --script
 
-# Buat file migration manual di prisma/migrations/<timestamp>_<name>/migration.sql
-# lalu tandai sebagai applied:
+# Save the SQL to prisma/migrations/<timestamp>_<name>/migration.sql, then run:
 bunx prisma migrate resolve --applied <migration_name>
+```
 
-# Atau untuk development: push langsung tanpa history tracking:
+For local development only, push the schema directly without tracking history:
+
+```bash
 bunx prisma db push
 ```
 
-#### Generate Prisma Client:
-```sh
-bunx prisma generate
-```
+### Run the development server
 
-### 4. Jalankan Dev Server
-```sh
+```bash
 bun run dev
 ```
 
----
+## Supabase Realtime setup
 
-## Konfigurasi Supabase Realtime
+Live updates on the dashboard and storefront require Realtime on the `SensorData` table.
 
-Fitur live update di etalase publik dan dashboard membutuhkan Realtime enabled pada tabel `SensorData`:
+1. Open the Supabase Dashboard and go to Database, then Replication.
+2. Enable replication for `public.SensorData`.
+3. Enable `INSERT` events.
 
-1. Buka Supabase Dashboard → **Database** → **Replication**
-2. Enable replication untuk tabel `public.SensorData`
-3. Pastikan **INSERT** events diaktifkan
+## API reference
 
----
+Devices authenticate with the `x-api-key` header. Create a device in the dashboard and copy its key right away, because the dashboard does not show it again.
 
-## Endpoint API (untuk ESP32/ESP8266)
+### Send sensor data
 
-### Kirim Data Sensor
+`POST /api/sensor-data`
+
+| Header         | Value                      |
+| -------------- | -------------------------- |
+| `x-api-key`    | `iot_mangga_<api_key>`     |
+| `Content-Type` | `application/json`         |
+
+Request body:
+
+```json
+{
+  "moisture": 65.2,
+  "ph": 6.8,
+  "tds": 320
+}
 ```
-POST /api/sensor-data
-Header: x-api-key: iot_mangga_<api_key>
-Body: { "moisture": 65.2, "ph": 6.8, "tds": 320 }
+
+Example:
+
+```bash
+curl -X POST https://<your-domain>/api/sensor-data \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: iot_mangga_<api_key>" \
+  -d '{"moisture": 65.2, "ph": 6.8, "tds": 320}'
 ```
 
-### OTA Firmware Check
-```
-GET /api/ota
-Header: x-api-key: <api_key>
-        x-firmware-version: 1.0.0
-        x-mac-address: AA:BB:CC:DD:EE:FF
-```
+### Check for firmware updates
 
----
+`GET /api/ota`
 
-## Build Production
+| Header               | Example value       |
+| -------------------- | ------------------- |
+| `x-api-key`          | `<api_key>`         |
+| `x-firmware-version` | `1.0.0`             |
+| `x-mac-address`      | `AA:BB:CC:DD:EE:FF` |
 
-```sh
+## Production build
+
+```bash
 bun run build
 bun run preview
 ```
 
----
+## Project structure
 
-## Reproduksi Project
+```text
+.
+├── prisma/            # Prisma schema and migrations
+├── src/               # SvelteKit application source
+├── static/            # Static assets
+├── .env.example       # Environment variable template
+├── prisma.config.ts   # Prisma configuration
+├── svelte.config.js   # SvelteKit configuration
+├── vite.config.js     # Vite configuration
+└── vercel.json        # Vercel configuration
+```
 
-```sh
-bun x sv@0.15.4 create --template minimal --no-types --add prettier tailwindcss="plugins:typography,forms" --install bun iotmangga
+## Scaffolding command
+
+The project started from this SvelteKit template:
+
+```bash
+bun x sv@0.15.4 create --template minimal --no-types \
+  --add prettier tailwindcss="plugins:typography,forms" \
+  --install bun iotmangga
 ```
